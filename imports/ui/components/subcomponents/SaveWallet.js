@@ -3,12 +3,19 @@ import Paper from 'material-ui/Paper';
 import {connect} from 'react-redux';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
-import {encrypt} from '/imports/cipher';
+import RefreshIndicator from 'material-ui/RefreshIndicator';
+import Dialog from 'material-ui/Dialog';
+import * as api from 'neon-js';
 
 const paperStyle = {
   marginTop: '3vh',
   marginBottom: '3vh',
   paddingTop: '2vh'
+};
+
+const refreshStyle = {
+  display: 'inline-block',
+  position: 'relative'
 };
 
 class SaveWallet extends Component {
@@ -21,8 +28,9 @@ class SaveWallet extends Component {
       walletName: '',
       walletSaved: false,
       walletExists: false,
-      saveButtonDisabled: true
-    }
+      saveButtonDisabled: true,
+      encrypting: false
+    };
   }
   
   componentDidUpdate() {
@@ -30,19 +38,19 @@ class SaveWallet extends Component {
   };
   
   saveWallet = () => {
-    console.log(this.state.walletName, this.state.passphrase, this.props.wif);
-    const encrypted = encrypt(this.state.passphrase, this.props.wif);
-    const id = Wallets.insert({
-      name: this.state.walletName,
-      encrypted: encrypted,
-      public: this.props.address
-    });
-    
-    if (id) {
-      this.setState({walletSaved: true});
-    }
-    
-    console.log(Wallets.find({}).fetch());
+    this.setState({encrypting: true});
+    Meteor.setTimeout(() => {
+      api.encrypt_wif(this.props.wif, this.state.passphrase).then((result) => {
+        const id = Wallets.insert({
+          name: this.state.walletName,
+          encrypted: result,
+          public: this.props.address
+        });
+        if (id) {
+          this.setState({walletSaved: true, encrypting: false});
+        }
+      });
+    }, 500);
   };
   
   saveButtonDisabled() {
@@ -64,39 +72,65 @@ class SaveWallet extends Component {
   render() {
     return (
       <Paper style={paperStyle}>
-        <strong>To use this wallet, save it with a secure passphrase.</strong>
-        <TextField
-          hintText="Name of the wallet"
-          name="walletName"
-          style={{"width": "90vw"}}
-          onChange={(o, value) => this.setState({walletName: value})}
-          disabled={this.state.walletSaved}
-          errorText={this.state.walletExists && !this.state.walletSaved ? "A wallet with this name already exists" : ''}
-        />
-        <TextField
-          hintText="Passphrase"
-          name="passphrase"
-          type="password"
-          style={{"width": "90vw"}}
-          disabled={this.state.walletSaved}
-          onChange={(o, value) => this.setState({passphrase: value})}
-        />
-        <TextField
-          hintText="Repeat"
-          name="passphraseRepeat"
-          type="password"
-          style={{"width": "90vw"}}
-          disabled={this.state.walletSaved}
-          errorText={this.state.passphrase !== this.state.passphraseRepeat ? 'Passphrases do not match' : false}
-          onChange={(o, value) => this.setState({passphraseRepeat: value})}
-        />
-        <RaisedButton
-          label={this.state.walletSaved ? "Your wallet was saved" : "Save wallet"}
-          secondary={true}
-          disabled={this.state.saveButtonDisabled}
-          fullWidth={true}
-          onClick={this.saveWallet}
-        />
+        <div style={{display: (!this.state.encrypting && this.state.walletSaved) ? 'block' : 'none'}}>
+          <strong>Your wallet has been encrypted and saved, you can now login with your passphrase.</strong><br />
+        </div>
+        <div style={{
+          display: (this.state.encrypting) ? 'block' : 'none',
+          position: 'relative',
+          width: '100%'
+        }}>
+          <Dialog
+            modal={false}
+            open={this.state.encrypting}
+            style={{justifyContent: 'center', textAlign: 'center'}}
+          >
+          
+          <p><strong>Encrypting your wallet, please wait...</strong></p>
+          <RefreshIndicator
+            size={80}
+            left={0}
+            top={0}
+            status="loading"
+            style={refreshStyle}
+          />
+          </Dialog>
+        </div>
+        <div style={{display: (this.state.encrypting || this.state.walletSaved) ? 'none' : 'block'}}>
+          <strong>To use this wallet, save it with a secure passphrase.</strong>
+          <TextField
+            hintText="Name of the wallet"
+            name="walletName"
+            style={{"width": "90vw"}}
+            onChange={(o, value) => this.setState({walletName: value})}
+            disabled={this.state.walletSaved}
+            errorText={this.state.walletExists && !this.state.walletSaved ? "A wallet with this name already exists" : ''}
+          />
+          <TextField
+            hintText="Passphrase"
+            name="passphrase"
+            type="password"
+            style={{"width": "90vw"}}
+            disabled={this.state.walletSaved}
+            onChange={(o, value) => this.setState({passphrase: value})}
+          />
+          <TextField
+            hintText="Repeat"
+            name="passphraseRepeat"
+            type="password"
+            style={{"width": "90vw"}}
+            disabled={this.state.walletSaved}
+            errorText={this.state.passphrase !== this.state.passphraseRepeat ? 'Passphrases do not match' : false}
+            onChange={(o, value) => this.setState({passphraseRepeat: value})}
+          />
+          <RaisedButton
+            label={this.state.walletSaved ? "Your wallet was saved" : "Save wallet"}
+            secondary={true}
+            disabled={this.state.saveButtonDisabled}
+            fullWidth={true}
+            onClick={this.saveWallet}
+          />
+        </div>
       </Paper>
     )
   }

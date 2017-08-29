@@ -1,6 +1,6 @@
 {
   "private": true,
-  "name": "CoZ Neo Mobile Wallet",
+  "name": "CoZ-Neo-Mobile-Wallet",
   "version": "0.0.1",
   "description": "CoZ Mobile light wallet for NEO blockchain",
   "scripts": {
@@ -17,8 +17,6 @@
     "base-x": "^3.0.2",
     "bcrypt-nodejs": "0.0.3",
     "bigi": "^1.4.2",
-    "buffer": "^5.0.7",
-    "crypto": "^1.0.1",
     "ecurve": "^1.0.5",
     "elliptic": "^6.4.0",
     "file-loader": "^0.9.0",

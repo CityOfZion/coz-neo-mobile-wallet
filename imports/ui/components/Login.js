@@ -5,6 +5,7 @@ import {login} from '/imports/modules/account';
 import TextField from 'material-ui/TextField';
 import RaisedButton from 'material-ui/RaisedButton';
 import WalletList from "./subcomponents/WalletList";
+import * as api from 'neon-js';
 
 const logo = '/images/neon-logo2.png';
 

@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import Paper from 'material-ui/Paper';
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
-import {decrypt} from '/imports/cipher';
 import { login } from '/imports/modules/account';
 import Dialog from 'material-ui/Dialog';
 import Divider from 'material-ui/Divider';
@@ -12,8 +11,9 @@ import {List, ListItem} from 'material-ui/List';
 import Subheader from 'material-ui/Subheader';
 import AccountBalanceWallet from 'material-ui/svg-icons/action/account-balance-wallet'
 import { connect } from 'react-redux';
-import { Link } from 'react-router';
-
+import * as api from 'neon-js';
+import {hashHistory} from 'react-router';
+import RefreshIndicator from 'material-ui/RefreshIndicator';
 
 const paperStyle = {
   marginTop: '3vh',
@@ -25,6 +25,11 @@ const listItemStyle = {
   textAlign: 'left'
 };
 
+const refreshStyle = {
+  display: 'inline-block',
+  position: 'relative'
+};
+
 class WalletList extends Component {
   
   constructor() {
@@ -33,7 +38,8 @@ class WalletList extends Component {
       disableLoginButton: true,
       open: false,
       passphrase: '',
-      wallet: {}
+      wallet: {},
+      loggingIn: false
     }
   }
   
@@ -42,14 +48,47 @@ class WalletList extends Component {
     this.setState({open: true, wallet: wallet});
   };
   
-  handleLogin = (e, value) => {
-    const wif = decrypt(value, this.state.wallet.encrypted);
-    this.props.dispatch(login(wif, this.state.wallet));
+  handleLogin = () => {
+    this.setState({loggingIn: true});
+    Meteor.setTimeout(() => {
+      api.decrypt_wif(this.state.wallet.encrypted, this.state.passphrase).then((result) => {
+        this.props.dispatch(login(result, this.state.wallet));
+        hashHistory.push('/dashboard');
+      });
+    }, 500);
   };
   
   handleClose = () => {
     this.setState({open: false});
   };
+  
+  loadingIndicator() {
+    return (<div>
+      <p><strong>Logging in, please wait...</strong></p>
+      <RefreshIndicator
+        size={80}
+        left={0}
+        top={0}
+        status="loading"
+        style={refreshStyle}
+        />
+    </div>)
+  }
+  
+  login() {
+    return (
+      <div>
+        <div>To unlock your wallet [{this.state.wallet.name}], you will need to enter your passphrase</div>
+        <TextField
+          style={{width: '100%'}}
+          name="passphrase"
+          type="password"
+          hintText="Fill in your passphrase"
+          onChange={(e, value) => this.setState({passphrase: value})}
+          />
+      </div>
+    )
+  }
   
   render() {
     const {loggedIn} = this.props;
@@ -60,11 +99,11 @@ class WalletList extends Component {
         secondary={true}
         onClick={this.handleClose}
       />,
-      <Link to="/dashboard"><RaisedButton
+      <RaisedButton
         label="Login"
         primary={true}
-        disabled={!loggedIn}
-      /></Link>,
+        onClick={this.handleLogin}
+      />,
     ];
     
     return (
@@ -83,15 +122,9 @@ class WalletList extends Component {
           actions={actions}
           modal={true}
           open={this.state.open}
+          style={{justifyContent: 'center', textAlign: 'center'}}
         >
-          <div>To unlock your wallet [{this.state.wallet.name}], you will need to enter your passphrase</div>
-          <TextField
-            style={{width: '100%'}}
-            name="passphrase"
-            type="password"
-            hintText="Fill in your passphrase"
-            onChange={this.handleLogin}
-          />
+          {this.state.loggingIn ? this.loadingIndicator() : this.login()}
         </Dialog>
       </div>
     )

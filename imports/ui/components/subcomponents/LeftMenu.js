@@ -1,10 +1,11 @@
 import React, {Component} from 'react';
 import Drawer from 'material-ui/Drawer';
 import MenuItem from 'material-ui/MenuItem';
-import {browserHistory} from 'react-router';
+import {hashHistory} from 'react-router';
 import {Link} from 'react-router';
 import RaisedButton from 'material-ui/RaisedButton';
 import Dialog from 'material-ui/Dialog';
+import CopyToClipboard from 'react-copy-to-clipboard';
 
 const style = {
   marginTop: '12vh'
@@ -14,7 +15,9 @@ export default class LeftMenu extends Component {
   constructor() {
     super();
     this.state = {
-      showConfirmNew: false
+      showConfirmNew: false,
+      donateModal: false,
+      copiedKey: false
     };
   }
   
@@ -36,6 +39,24 @@ export default class LeftMenu extends Component {
     return (
       <div>
         <Dialog
+          modal={false}
+          open={this.state.donateModal}
+          style={{justifyContent: 'center', textAlign: 'center'}}
+        >
+          <p><strong>If you want to donate you are welcome to send it to totalvamp: AaGw1zYyqGVcjZVE25VSy6749XoEUWkhb3</strong></p>
+          <CopyToClipboard
+            text="AaGw1zYyqGVcjZVE25VSy6749XoEUWkhb3"
+            onCopy={() => this.setState({copiedKey: true})}>
+            <span>
+              <RaisedButton
+                label={this.state.copiedKey ? "Copied address" : "Copy address"}
+                primary={!this.state.copiedKey}
+                secondary={this.state.copiedKey}
+              />
+          </span>
+          </CopyToClipboard>
+        </Dialog>
+        <Dialog
           title="Do you want to create a new wallet?"
           actions={actions}
           modal={true}
@@ -47,9 +68,8 @@ export default class LeftMenu extends Component {
           containerStyle={style}
           onRequestChange={(open) => handleMenuToggle()}
         >
-          <MenuItem target="create" value="create" onClick={() => browserHistory.push('/create')}>Create wallet</MenuItem>
-          <MenuItem><Link to="/">Open wallet</Link></MenuItem>
-          <MenuItem value="donate" onClick={() => browserHistory.push('/donate')}>Donate to totalvamp</MenuItem>
+          <MenuItem target="create" value="create" onClick={() => hashHistory.push('/create')}>Create wallet</MenuItem>
+          <MenuItem value="donate" onClick={e => setState({donateModal: true})}>Donate to totalvamp</MenuItem>
         </Drawer>
       </div>
     );

@@ -65,12 +65,14 @@ class CreateWallet extends Component {
           <CopyToClipboard
             text={this.props.address}
             onCopy={() => this.setState({copiedPubKey: true})}>
-        <span><RaisedButton
-          label={this.state.copiedPubKey ? "Copied public key" : "Copy public key"}
-          primary={!this.state.copiedPubKey}
-          secondary={this.state.copiedPubKey}
-        /></span>
-      </CopyToClipboard>
+            <span>
+              <RaisedButton
+              label={this.state.copiedPubKey ? "Copied public key" : "Copy public key"}
+              primary={!this.state.copiedPubKey}
+              secondary={this.state.copiedPubKey}
+            />
+          </span>
+        </CopyToClipboard>
         </span>
           <span className="key">
           <TextField

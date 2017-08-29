@@ -1,5 +1,7 @@
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
+import { logout } from '/imports/modules/account';
+import {hashHistory} from 'react-router';
 
 import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import IconButton from 'material-ui/IconButton';
@@ -28,8 +30,14 @@ const styles = {
   }
 };
 
-export default class MobileIconMenu extends Component {
+class MobileIconMenu extends Component {
 
+  logoutHandler = () => {
+    console.log('trying to log out');
+    this.props.dispatch(logout());
+    hashHistory.push('/');
+  }
+  
   render() {
     
     const {blockHeight, isMainNet, handleToggle} = this.props;
@@ -56,13 +64,15 @@ export default class MobileIconMenu extends Component {
         </MenuItem>
         <MenuItem primaryText="Refresh"/>
         <MenuItem primaryText="Help"/>
-        <MenuItem primaryText="Sign out"/>
+        <MenuItem onClick={this.logoutHandler} primaryText="Sign out"/>
       </IconMenu>);
   }
 }
 
-MobileIconMenu.propTypes = {
-  blockHeight: PropTypes.number,
-  isMainNet: PropTypes.bool,
-  handleToggle: PropTypes.func
-};
+const mapStateToProps = (state) => ({
+  loggedIn: state.account.loggedIn
+});
+
+MobileIconMenu = connect(mapStateToProps)(MobileIconMenu);
+
+export default MobileIconMenu;
