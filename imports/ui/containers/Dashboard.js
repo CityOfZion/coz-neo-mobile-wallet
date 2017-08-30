@@ -92,6 +92,11 @@ class Dashboard extends Component {
   
   handleMainNetToggle = () => {
     this.setState({mainNet: !this.state.mainNet});
+    this.props.dispatch(setNetwork(newNet));
+    resetBalanceSync(dispatch, newNet, address);
+    if (address !== null){
+      initiateGetBalance(dispatch, newNet, address);
+    }
   };
   
   handleChange = (value) => {
@@ -131,7 +136,7 @@ class Dashboard extends Component {
         <div id="headerInfo">
           <AppBar
             onLeftIconButtonTouchTap={this.handleMenuToggle}
-            title={<div style={styles.logoDiv}><img src={logo} style={styles.logo} /><span style={styles.running}>Running on {this.state.mainNet ? 'MainNet' : 'TestNet'}</span></div>}
+            title={<div style={styles.logoDiv}><img src={logo} style={styles.logo} /><span style={styles.running}>Running on {this.props.net}</span></div>}
             titleStyle={styles.titleStyle}
             iconElementRight={
             <MobileIconMenu
@@ -174,6 +179,7 @@ class Dashboard extends Component {
 
 const mapStateToProps = (state) => ({
   wif: state.account.wif,
+  net: state.metadata.network,
   sendPane: state.dashboard.sendPane,
   confirmPane: state.dashboard.confirmPane,
   status: state.transactions.success,

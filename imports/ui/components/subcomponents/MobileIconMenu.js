@@ -7,10 +7,11 @@ import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 import IconButton from 'material-ui/IconButton';
 import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
-import Toggle from 'material-ui/Toggle';
+
 import Divider from 'material-ui/Divider';
 
 import {version} from '../../../../package.json'
+import {NetworkSwitch} from "./NetworkSwitch";
 
 const styles = {
   iconStyle: {
@@ -36,7 +37,7 @@ class MobileIconMenu extends Component {
     console.log('trying to log out');
     this.props.dispatch(logout());
     hashHistory.push('/');
-  }
+  };
   
   render() {
     
@@ -54,14 +55,7 @@ class MobileIconMenu extends Component {
         <MenuItem disabled={true}><span>Version: </span><span>{version}</span></MenuItem>
         <MenuItem disabled={true}><span>Block: </span><span>{blockHeight}</span></MenuItem>
         <Divider/>
-        <MenuItem >
-          <Toggle
-            style={{transform: 'translateY(+50%)'}}
-            label={isMainNet ? 'MainNet' : 'TestNet'}
-            defaultToggled={isMainNet}
-            onToggle={handleToggle}
-          />
-        </MenuItem>
+        <NetworkSwitch/>
         <MenuItem primaryText="Refresh"/>
         <MenuItem primaryText="Help"/>
         <MenuItem onClick={this.logoutHandler} primaryText="Sign out"/>

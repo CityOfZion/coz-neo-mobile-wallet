@@ -115,7 +115,7 @@ class SaveWallet extends Component {
             onChange={(o, value) => this.setState({passphrase: value})}
           />
           <TextField
-            hintText="Repeat"
+            hintText="Repeat passphrase"
             name="passphraseRepeat"
             type="password"
             style={{"width": "90vw"}}

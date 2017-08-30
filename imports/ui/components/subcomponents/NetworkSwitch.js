@@ -4,6 +4,8 @@ import { getBalance, getTransactionHistory, getMarketPriceUSD, neoId, getClaimAm
 import { setClaim } from '/imports/modules/claim';
 import { setBlockHeight, setNetwork } from '/imports/modules/metadata';
 import { setBalance, setMarketPrice, resetPrice, setTransactionHistory, } from '/imports/modules/wallet';
+import MenuItem from 'material-ui/MenuItem';
+import Toggle from 'material-ui/Toggle';
 
 let intervals = {};
 
@@ -75,6 +77,7 @@ const toggleNet = (dispatch, net, address) => {
   } else {
     newNet = "MainNet";
   }
+  console.log('toggleNet', net, address);
   dispatch(setNetwork(newNet));
   resetBalanceSync(dispatch, newNet, address);
   if (address !== null){
@@ -88,10 +91,14 @@ class NetworkSwitch extends Component {
   }
 
   render = () =>
-    <div id="network">
-      <span className="transparent">Running on</span>
-      <span className="netName" onClick={() => toggleNet(this.props.dispatch, this.props.net, this.props.address)}>{this.props.net}</span>
-    </div>;
+    <MenuItem >
+      <Toggle
+        style={{transform: 'translateY(+50%)'}}
+        label={this.props.net}
+        defaultToggled={this.props.net === 'MainNet'}
+        onToggle={() => toggleNet(this.props.dispatch, this.props.net, this.props.address)}
+      />
+    </MenuItem>;
 
 }
 

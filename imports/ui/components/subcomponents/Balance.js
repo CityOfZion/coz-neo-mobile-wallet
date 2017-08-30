@@ -3,7 +3,7 @@ import MdSync from 'react-icons/lib/md/sync';
 import {connect} from 'react-redux';
 import {sendEvent, clearTransactionEvent} from '/imports/modules/transactions';
 import Paper from 'material-ui/Paper';
-import {initiateGetBalance, intervals} from "/imports/ui/components/NetworkSwitch";
+import {initiateGetBalance, intervals} from "/imports/ui/components/subcomponents/NetworkSwitch";
 import RefreshIndicator from 'material-ui/RefreshIndicator';
 
 const styles = {

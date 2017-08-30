@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { syncTransactionHistory } from "/imports/ui/components/NetworkSwitch";
+import { syncTransactionHistory } from "/imports/ui/components/subcomponents/NetworkSwitch";
 import Divider from 'material-ui/Divider';
 
 // TODO: make this a user setting
@@ -22,6 +22,7 @@ const openExplorer = (srcLink) => {
 class TransactionHistory extends Component {
 
   componentDidMount = () => {
+    console.log('net', this.props.net);
     syncTransactionHistory(this.props.dispatch, this.props.net, this.props.address);
   }
 

@@ -14,7 +14,10 @@ import { connect } from 'react-redux';
 import * as api from 'neon-js';
 import {hashHistory} from 'react-router';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
-
+import MenuItem from 'material-ui/MenuItem';
+import IconMenu from 'material-ui/IconMenu';
+import IconButton from 'material-ui/IconButton';
+import MoreVertIcon from 'material-ui/svg-icons/navigation/more-vert';
 const paperStyle = {
   marginTop: '3vh',
   marginBottom: '3vh',
@@ -39,7 +42,10 @@ class WalletList extends Component {
       open: false,
       passphrase: '',
       wallet: {},
-      loggingIn: false
+      active: false,
+      showDeleteModal: false,
+      targetWalletName: '',
+      showExportModal: false
     }
   }
   
@@ -48,12 +54,14 @@ class WalletList extends Component {
     this.setState({open: true, wallet: wallet});
   };
   
-  handleLogin = () => {
-    this.setState({loggingIn: true});
+  loginHandler = () => {
+    this.setState({active: true});
     Meteor.setTimeout(() => {
       api.decrypt_wif(this.state.wallet.encrypted, this.state.passphrase).then((result) => {
         this.props.dispatch(login(result, this.state.wallet));
         hashHistory.push('/dashboard');
+      }).catch(e => {
+        this.setState({active: false, error: true});
       });
     }, 500);
   };
@@ -62,9 +70,9 @@ class WalletList extends Component {
     this.setState({open: false});
   };
   
-  loadingIndicator() {
-    return (<div>
-      <p><strong>Logging in, please wait...</strong></p>
+  loadingIndicator = () => {
+    return <div>
+      <p><strong>Loading, please wait...</strong></p>
       <RefreshIndicator
         size={80}
         left={0}
@@ -72,10 +80,10 @@ class WalletList extends Component {
         status="loading"
         style={refreshStyle}
         />
-    </div>)
+    </div>;
   }
   
-  login() {
+  loginModal() {
     return (
       <div>
         <div>To unlock your wallet [{this.state.wallet.name}], you will need to enter your passphrase</div>
@@ -84,15 +92,100 @@ class WalletList extends Component {
           name="passphrase"
           type="password"
           hintText="Fill in your passphrase"
+          errorText={this.state.error ? 'Your passphrase is wrong, enter again' : ''}
           onChange={(e, value) => this.setState({passphrase: value})}
           />
       </div>
     )
   }
   
+  deleteModal() {
+    return (
+      <div>
+        <div>To delete this wallet [{this.state.targetWalletName}], you will need to enter your passphrase. <br/>
+          <strong>Be aware that deleting a wallet with funds, while you don't have a copy of the private key, will result in a loss.</strong></div>
+        <TextField
+          style={{width: '100%'}}
+          name="passphrase"
+          type="password"
+          hintText="Fill in your passphrase"
+          errorText={this.state.error ? 'Your passphrase is wrong, enter again' : ''}
+          onChange={(e, value) => this.setState({passphrase: value})}
+        />
+      </div>
+    )
+  }
+  
+  exportModal() {
+    return (
+      <div>
+        <div>You can export this wallet [{this.state.targetWalletName}] to import it at another device, your export will be encrypted by your passphrase.</div>
+        <TextField
+          style={{width: '100%'}}
+          name="passphrase"
+          type="password"
+          hintText="Fill in your passphrase"
+          errorText={this.state.error ? 'Your passphrase is wrong, enter again' : ''}
+          onChange={(e, value) => this.setState({passphrase: value})}
+          />
+      </div>
+    )
+  }
+  
+  deleteHandler = () => {
+    console.log('deleting wallet');
+    this.setState({active: true});
+    Meteor.setTimeout(() => {
+      const wallet = Wallets.findOne({name: this.state.targetWalletName});
+      api.decrypt_wif(wallet.encrypted, this.state.passphrase).then((result) => {
+        Wallets.remove({name: this.state.targetWalletName});
+        this.setState({active: false, error: false, open: false, showDeleteModal: false});
+      }).catch(e => {
+        console.log('error', e);
+        this.setState({active: false, error: true});
+      });
+    }, 500);
+  };
+  
+  exportHandler = (data) => {
+    console.log(data);
+    
+  };
+  
+  rightIconMenu = (name) => {
+    
+    const iconButtonElement = (
+      <IconButton
+        touch={true}
+        tooltip="more"
+        tooltipPosition="bottom-left"
+      >
+        <MoreVertIcon />
+      </IconButton>
+    );
+    
+    return (
+      <IconMenu iconButtonElement={iconButtonElement}>
+        <MenuItem onClick={() => this.setState({targetWalletName: name, showExportModal: true, open: true})}>Export</MenuItem>
+        <MenuItem onClick={() => this.setState({targetWalletName: name, showDeleteModal: true, open: true})}>Delete</MenuItem>
+      </IconMenu>
+    );
+  };
+  
+  getModal = () => {
+    if(this.state.showExportModal) return this.exportModal();
+    if(this.state.showDeleteModal) return this.deleteModal();
+    return this.loginModal();
+  };
+  
+  getModalConfirmHandle = () => {
+    if(this.state.showExportModal) return this.exportHandler;
+    if(this.state.showDeleteModal) return this.deleteHandler;
+    return this.loginHandler;
+  };
+  
   render() {
     const {loggedIn} = this.props;
-    console.log('loggedIn', loggedIn, this.state.loggedIn);
     const actions = [
       <RaisedButton
         label="Cancel"
@@ -100,9 +193,9 @@ class WalletList extends Component {
         onClick={this.handleClose}
       />,
       <RaisedButton
-        label="Login"
+        label="Confirm"
         primary={true}
-        onClick={this.handleLogin}
+        onClick={this.getModalConfirmHandle()}
       />,
     ];
     
@@ -113,7 +206,7 @@ class WalletList extends Component {
           <Subheader style={{padding: 0, margin: 0}}>Your wallets</Subheader>
           <Divider />
           {this.props.wallets.map((wallet, index) => {
-            return <ListItem key={index} primaryText={wallet.name} onClick={this.handleWalletClick.bind(this, wallet)} style={listItemStyle} leftIcon={<AccountBalanceWallet />} />
+            return <ListItem key={index} primaryText={wallet.name} onClick={this.handleWalletClick.bind(this, wallet)} style={listItemStyle} leftIcon={<AccountBalanceWallet />} rightIconButton={this.rightIconMenu(wallet.name)} />
           })}
         </List>
       </Paper>
@@ -124,7 +217,7 @@ class WalletList extends Component {
           open={this.state.open}
           style={{justifyContent: 'center', textAlign: 'center'}}
         >
-          {this.state.loggingIn ? this.loadingIndicator() : this.login()}
+          {this.state.active ? this.loadingIndicator() : this.getModal()}
         </Dialog>
       </div>
     )

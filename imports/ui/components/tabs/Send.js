@@ -65,6 +65,12 @@ class Send extends Component {
         });
         console.log('error');
         setTimeout(() => clearTransactionEvent(), 5000);
+      } else {
+        this.setState({
+          targetAddressError: '',
+          formValid: true,
+          targetAddress: address
+        });
       }
     } catch (e) {
       this.setState({
@@ -110,17 +116,25 @@ class Send extends Component {
         formValid: false
       });
       setTimeout(() => clearTransactionEvent(), 5000);
+    } else {
+      this.setState({targetAmount: amount, targetAmountError: ''});
     }
   };
   
   handlePassphraseConfirmation = () => {
     
     this.setState({validatingPassphrase: true});
-    
+    console.log(this.props.wallet.encrypted, this.state.passphrase);
     Meteor.setTimeout(() => {
-      api.decrypt_wif(this.state.wallet.encrypted, this.state.passphrase).then((result) => {
-        this.sendTransaction();
-      }).catch(() => {
+
+      api.encrypt_wif(this.props.wif, this.state.passphrase).then((result) => {
+        console.log('passphrase checking', result);
+        if(result === this.props.wallet.encrypted) {
+          this.sendTransaction();
+          this.setState({validatingPassphrase: false, confirmWindow: false, sendError: ''});
+        }
+      }).catch(e => {
+        console.log('ERROR', e);
         this.setState({sendError: 'Your passphrase is incorrect, please try again'});
         this.setState({validatingPassphrase: false});
       });
@@ -129,6 +143,7 @@ class Send extends Component {
   
   // perform send transaction
   sendTransaction = () => {
+    console.log('sending transaction');
     doSendAsset(this.props.net, this.state.targetAddress, this.props.wif, this.state.currency, this.state.targetAmount).then((response) => {
       if (response.result === undefined) {
         this.props.dispatch(sendEvent(false, "Transaction failed!"));
@@ -169,7 +184,7 @@ class Send extends Component {
         label="Confirm"
         primary={true}
         disabled={this.state.validatingPassphrase}
-        onclick={this.handlePassphraseConfirmation}
+        onClick={this.handlePassphraseConfirmation}
       />
     ];
     
@@ -182,8 +197,7 @@ class Send extends Component {
           open={this.state.confirmWindow}
           style={{justifyContent: 'center', textAlign: 'center'}}
         >
-          <div>If you are sure you want to send {this.state.targetAmount} in {this.state.currency}
-            to {this.state.targetAddress}?
+          <div>If you are sure you want to send <strong>{this.state.targetAmount} {this.state.currency}</strong> to <strong>{this.state.targetAddress}</strong>?
           </div>
           <div>If so, enter your passphrase below to confirm.</div>
           {this.state.validatingPassphrase ? this.loadingIndicator() : ''}
@@ -198,9 +212,9 @@ class Send extends Component {
         </Dialog>
         <Balance/>
         <Paper style={styles.toggle} zDepth={1}>
-          <div style={{order: 1, fontSize: '3em'}}>{this.state.currency}</div>
+          <div style={{order: 1, fontSize: '3em', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>{this.state.currency}</div>
           <RaisedButton
-            label={`Change to ${this.state.currency === 'Neo' ? 'Gas' : 'Neo'}`}
+            label={`Switch to ${this.state.currency === 'Neo' ? 'Gas' : 'Neo'}`}
             fullWidth={true}
             primary={this.state.currency === 'Neo'}
             secondary={this.state.currency === 'Gas'}

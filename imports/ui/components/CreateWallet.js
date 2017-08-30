@@ -67,7 +67,7 @@ class CreateWallet extends Component {
             onCopy={() => this.setState({copiedPubKey: true})}>
             <span>
               <RaisedButton
-              label={this.state.copiedPubKey ? "Copied public key" : "Copy public key"}
+              label={this.state.copiedPubKey ? "Copied to clipboard" : "Copy public key"}
               primary={!this.state.copiedPubKey}
               secondary={this.state.copiedPubKey}
             />
@@ -91,7 +91,7 @@ class CreateWallet extends Component {
             text={this.props.wif}
             onCopy={() => this.setState({copiedPrivKey: true})}>
         <RaisedButton
-          label={this.state.copiedPrivKey ? "Copied private key" : "Copy private key"}
+          label={this.state.copiedPrivKey ? "Copied to clipboard" : "Copy private key"}
           primary={!this.state.copiedPrivKey}
           secondary={this.state.copiedPrivKey}
         />

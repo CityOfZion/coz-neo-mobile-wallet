@@ -69,6 +69,7 @@ export default class LeftMenu extends Component {
           onRequestChange={(open) => handleMenuToggle()}
         >
           <MenuItem target="create" value="create" onClick={() => hashHistory.push('/create')}>Create wallet</MenuItem>
+          <MenuItem target="create" value="create" onClick={() => hashHistory.push('/addressbook')}>Create wallet</MenuItem>
           <MenuItem value="donate" onClick={e => setState({donateModal: true})}>Donate to totalvamp</MenuItem>
         </Drawer>
       </div>
