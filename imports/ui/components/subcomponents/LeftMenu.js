@@ -49,12 +49,19 @@ export default class LeftMenu extends Component {
             onCopy={() => this.setState({copiedKey: true})}>
             <span>
               <RaisedButton
+                fullWidth={true}
                 label={this.state.copiedKey ? "Copied address" : "Copy address"}
                 primary={!this.state.copiedKey}
                 secondary={this.state.copiedKey}
               />
           </span>
           </CopyToClipboard>
+          <RaisedButton
+            fullWidth={true}
+            label="Close"
+            primary={true}
+            onClick={e => this.setState({donateModal: false})}
+          />
         </Dialog>
         <Dialog
           title="Do you want to create a new wallet?"
@@ -68,9 +75,9 @@ export default class LeftMenu extends Component {
           containerStyle={style}
           onRequestChange={(open) => handleMenuToggle()}
         >
-          <MenuItem target="create" value="create" onClick={() => hashHistory.push('/create')}>Create wallet</MenuItem>
-          <MenuItem target="create" value="create" onClick={() => hashHistory.push('/addressbook')}>Create wallet</MenuItem>
-          <MenuItem value="donate" onClick={e => setState({donateModal: true})}>Donate to totalvamp</MenuItem>
+          <MenuItem onClick={() => hashHistory.push('/create')}>Create wallet</MenuItem>
+          <MenuItem onClick={() => hashHistory.push('/addressbook')}>Address book</MenuItem>
+          <MenuItem onClick={e => this.setState({donateModal: true})}>Donate to totalvamp</MenuItem>
         </Drawer>
       </div>
     );

@@ -55,19 +55,20 @@ class WalletList extends Component {
   };
   
   loginHandler = () => {
-    this.setState({active: true});
+    this.setState({active: true, error: false});
     Meteor.setTimeout(() => {
       api.decrypt_wif(this.state.wallet.encrypted, this.state.passphrase).then((result) => {
         this.props.dispatch(login(result, this.state.wallet));
         hashHistory.push('/dashboard');
       }).catch(e => {
+        console.log('Not logging in');
         this.setState({active: false, error: true});
       });
     }, 500);
   };
   
   handleClose = () => {
-    this.setState({open: false});
+    this.setState({open: false, active: false, error: true});
   };
   
   loadingIndicator = () => {
@@ -205,6 +206,7 @@ class WalletList extends Component {
         <List style={{margin:0, padding: 0}}>
           <Subheader style={{padding: 0, margin: 0}}>Your wallets</Subheader>
           <Divider />
+          {this.props.wallets.length === 0 ? 'You have no wallets configured': ''}
           {this.props.wallets.map((wallet, index) => {
             return <ListItem key={index} primaryText={wallet.name} onClick={this.handleWalletClick.bind(this, wallet)} style={listItemStyle} leftIcon={<AccountBalanceWallet />} rightIconButton={this.rightIconMenu(wallet.name)} />
           })}
@@ -217,7 +219,7 @@ class WalletList extends Component {
           open={this.state.open}
           style={{justifyContent: 'center', textAlign: 'center'}}
         >
-          {this.state.active ? this.loadingIndicator() : this.getModal()}
+          {this.state.active && !this.state.error ? this.loadingIndicator() : this.getModal()}
         </Dialog>
       </div>
     )

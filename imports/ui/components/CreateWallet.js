@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import {newWallet} from '/imports/modules/generateWallet';
+import {newWallet, resetWallet} from '/imports/modules/generateWallet';
 import {Link} from 'react-router';
 import QRCode from 'qrcode';
+import {hashHistory} from 'react-router';
 
 import RaisedButton from 'material-ui/RaisedButton';
 import TextField from 'material-ui/TextField';
@@ -41,6 +42,11 @@ class CreateWallet extends Component {
     QRCode.toCanvas(this.privateCanvas, this.props.wif, {version: 5}, (err) => {
       if (err) console.log(err)
     });
+  };
+  
+  handleBack =() => {
+    this.props.dispatch(resetWallet());
+    hashHistory.push('/');
   };
   
   render = () =>
@@ -109,13 +115,12 @@ class CreateWallet extends Component {
         </div>
       </Paper>
       <SaveWallet/>
-      <Link to="/">
         <RaisedButton
         label="Back to Login"
         fullWidth={true}
         primary={true}
+        onClick={e => this.handleBack()}
         />
-      </Link>
     </div>;
   
 }

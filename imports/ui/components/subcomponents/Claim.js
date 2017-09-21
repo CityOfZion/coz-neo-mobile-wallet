@@ -45,7 +45,7 @@ class Claim extends Component {
   
   componentDidUpdate = () => {
     // if we requested a claim and new claims are available, do claim
-    if (this.props.claimRequest === true && this.props.claimWasUpdated == true){
+    if (this.props.claimRequest === true && this.props.claimWasUpdated === true){
       this.props.dispatch(setClaimRequest(false));
       doClaimAllGas(this.props.net, this.props.wif).then((response) => {
         if (response.result === true){

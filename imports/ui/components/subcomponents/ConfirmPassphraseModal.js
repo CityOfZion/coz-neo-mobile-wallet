@@ -44,11 +44,13 @@ class ConfirmPassphraseModal extends Component {
   
     const actions = [
       <RaisedButton
+        fullWidth={true}
         label="Cancel"
         secondary={true}
         onClick={this.handleClose}
       />,
       <RaisedButton
+        fullWidth={true}
         label={confirmLabel}
         primary={true}
         onClick={callback}

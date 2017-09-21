@@ -3,6 +3,7 @@ import * as neon from 'neon-js';
 // Constants
 const NEW_WALLET = 'NEW_WALLET';
 const IMPORT_WALLET = 'IMPORT_WALLET';
+const RESET_WALLET = 'RESET_WALLET';
 
 // Actions
 export function newWallet() {
@@ -18,6 +19,12 @@ export function importWallet(wif) {
   }
 }
 
+export function resetWallet() {
+  return {
+    type: RESET_WALLET
+  }
+}
+
 // Reducer used for state necessary to generating a wallet
 export default (state = {wif: null, address: null}, action) => {
   switch (action.type) {
@@ -26,7 +33,10 @@ export default (state = {wif: null, address: null}, action) => {
       const newWif = neon.getWIFFromPrivateKey(newPrivateKey);
       return {...state, wif: newWif, address: neon.getAccountsFromWIFKey(newWif)[0].address};
     case IMPORT_WALLET:
+      if(!neon.getAccountsFromWIFKey(action.wif)[0]) return {...state, wif: false, address: false};
       return {...state, wif: action.wif, address: neon.getAccountsFromWIFKey(action.wif)[0].address};
+    case RESET_WALLET:
+      return {...state, wif: false, address: false};
     default:
       return state;
   }

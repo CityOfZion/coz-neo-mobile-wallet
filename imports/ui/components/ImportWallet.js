@@ -25,19 +25,25 @@ class ImportWallet extends Component {
       address: '',
       publicCanvas: false,
       privateCanvas: false,
-      
-    }
+      privKeyValid: false
+    };
+    console.log(this.props);
+  
   }
   
   handleChange = value => {
     this.props.dispatch(importWallet(value));
+  
     if (this.props.address) {
       this.setState({address: this.props.address})
     }
   };
   
   componentDidUpdate = () => {
-    if (this.props.address) {
+    
+    console.log(this.props.address, this.props.wif);
+    
+    if (this.props.address !== false && this.props.wif !== false) {
       QRCode.toCanvas(this.publicCanvas, this.props.address, {version: 5}, (err) => {
         if (err) console.log(err)
       });
@@ -62,8 +68,12 @@ class ImportWallet extends Component {
     )
   };
   
-  render = () =>
-    <div id="importWallet">
+  render = () => {
+  
+    console.log('render', this.props.address, this.props.wif);
+  
+  
+    return <div id="importWallet">
       <Paper style={paperStyle}>
         <div className="disclaimer">
           For now this wallet only supports importing a private key.
@@ -78,7 +88,7 @@ class ImportWallet extends Component {
             onChange={(e, value) => this.handleChange(value)}
           />
         </div>
-        {this.props.address ? this.qrCodes() : ''}
+        {this.props.wif ? this.qrCodes() : ''}
       </Paper>
       <div style={{display: this.props.address ? 'block' : 'none'}}>
         <Paper style={paperStyle}>
@@ -133,8 +143,8 @@ class ImportWallet extends Component {
             </span>
           </div>
         </Paper>
-      <SaveWallet/>
-    </div>
+        <SaveWallet/>
+      </div>
       <Link to="/">
         <RaisedButton
           label="Back to Login"
@@ -143,6 +153,7 @@ class ImportWallet extends Component {
         />
       </Link>
     </div>;
+  }
   
 }
 

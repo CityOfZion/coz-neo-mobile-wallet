@@ -9,6 +9,9 @@ import Paper from 'material-ui/Paper';
 import Dialog from 'material-ui/Dialog';
 import * as api from 'neon-js';
 import RefreshIndicator from 'material-ui/RefreshIndicator';
+import SelectField from 'material-ui/SelectField';
+import PropTypes from 'prop-types';
+import AddressSelector from "../subcomponents/AddressSelector";
 
 const styles = {
   toggle: {
@@ -43,7 +46,8 @@ class Send extends Component {
       enteredValidPassphrase: false,
       passphrase: '',
       validatingPassphrase: false,
-      sendError: ''
+      sendError: '',
+      defaultAddress: ''
     };
   }
   
@@ -141,6 +145,11 @@ class Send extends Component {
     }, 500);
   };
   
+  handleAddressChange = address => {
+    console.log('SENDTO', address);
+    this.setState({defaultAddress: address.address});
+  };
+  
   // perform send transaction
   sendTransaction = () => {
     console.log('sending transaction');
@@ -222,11 +231,13 @@ class Send extends Component {
             style={{order: 2}}
           />
         </Paper>
-        <div id="sendAddress">
+        <div id="sendAddress" >
+          <AddressSelector handleChange={this.handleAddressChange} />
           <TextField
             hintText="Put in a valid NEO address"
             floatingLabelText="Where to send the asset (address)"
-            style={{"width": "90vw"}}
+            style={{"width": "90vw", "textAlign": "center"}}
+            value={this.state.defaultAddress}
             errorText={this.state.targetAddressError}
             onChange={this.validateAddress}
           />
